@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+*.tsbuildinfo
+.turbo
+
+# Claude Code local state (skill symlinks + per-machine settings)
+.claude/
