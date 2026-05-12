@@ -8,7 +8,7 @@ import {
   type TransactionsPage,
 } from "../types/transactions.js";
 
-const API_VERSION = "2019-02-01";
+const API_VERSION = "2020-10-01";
 type Role = "advertiser" | "network" | "affiliate";
 
 export class TransactionsFamily {

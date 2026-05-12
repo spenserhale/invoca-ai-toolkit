@@ -32,7 +32,7 @@ describe("TransactionsFamily.advertiser()", () => {
     });
     const call = handle.calls[0]!;
     expect(call.method).toBe("GET");
-    expect(call.url).toContain("https://acme.invoca.net/api/2019-02-01/advertisers/transactions/123.json");
+    expect(call.url).toContain("https://acme.invoca.net/api/2020-10-01/advertisers/transactions/123.json");
     expect(call.url).toContain("from=2024-01-01");
     expect(call.url).toContain("to=2024-01-31");
     expect(call.url).toContain("limit=10");
@@ -42,12 +42,12 @@ describe("TransactionsFamily.advertiser()", () => {
     }
   });
 
-  it("includes Authorization header with Bearer token", async () => {
+  it("sends raw Authorization header (Invoca uses no scheme prefix)", async () => {
     handle = mockFetch({ status: 200, body: transactionsResponse });
     const family = makeFamily({ oauthToken: "my-secret-token" });
     await family.advertiser("123");
     const call = handle.calls[0]!;
-    expect(call.headers["authorization"]).toBe("Bearer my-secret-token");
+    expect(call.headers["authorization"]).toBe("my-secret-token");
   });
 });
 
@@ -57,7 +57,7 @@ describe("TransactionsFamily.network()", () => {
     const family = makeFamily();
     await family.network("456");
     const call = handle.calls[0]!;
-    expect(call.url).toContain("https://acme.invoca.net/api/2019-02-01/networks/transactions/456.json");
+    expect(call.url).toContain("https://acme.invoca.net/api/2020-10-01/networks/transactions/456.json");
   });
 });
 
@@ -67,7 +67,7 @@ describe("TransactionsFamily.affiliate()", () => {
     const family = makeFamily();
     await family.affiliate("789");
     const call = handle.calls[0]!;
-    expect(call.url).toContain("https://acme.invoca.net/api/2019-02-01/affiliates/transactions/789.json");
+    expect(call.url).toContain("https://acme.invoca.net/api/2020-10-01/affiliates/transactions/789.json");
   });
 });
 

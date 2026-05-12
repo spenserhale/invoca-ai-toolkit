@@ -31,7 +31,7 @@ describe("SignalFamily.apply() (POST)", () => {
     const call = handle.calls[0]!;
     expect(call.method).toBe("POST");
     expect(call.url).toBe("https://invoca.net/api/2018-02-01/transactions.json");
-    expect(call.headers["authorization"]).toBe("Bearer my-secret-token");
+    expect(call.headers["authorization"]).toBe("my-secret-token");
     expect(JSON.parse(call.body!)).toMatchObject({
       search: { transaction_id: "00000000-00000001" },
       signals: [{ name: "lead_quality" }],
@@ -112,7 +112,7 @@ describe("SignalFamily.update() (PUT)", () => {
     const call = handle.calls[0]!;
     expect(call.method).toBe("PUT");
     expect(call.url).toBe("https://invoca.net/api/2018-02-01/transactions.json");
-    expect(call.headers["authorization"]).toBe("Bearer update-token");
+    expect(call.headers["authorization"]).toBe("update-token");
   });
 
   it("corrects_transaction_id reflects correction in PUT response", async () => {
