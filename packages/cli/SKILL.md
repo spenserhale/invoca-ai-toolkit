@@ -290,9 +290,53 @@ Flags:
 Examples:
 
 ```
-invoca transactions list --as advertiser --id 123 --from 2024-01-01 --to 2024-01-31 --json
+invoca transactions list --as advertiser --id 123 --from 2026-05-01 --to 2026-05-12 --type Call --json
 invoca transactions list --as network --id 456 --limit 50 --cursor TXN-LAST-ID
-invoca transactions list --as affiliate --id 789 --type Signal
+invoca transactions list --as advertiser --id 123 --include transaction_id,recording_download_url --csv
+```
+
+### `invoca transactions get`
+
+Fetch a single transaction by its transaction_id
+
+Positional:
+- `transaction_id` — Invoca transaction ID
+
+Flags:
+- `--as` [advertiser|network|affiliate] (required) — Role: advertiser, network, or affiliate
+- `--id` (required) — Advertiser, network, or affiliate ID
+- `--toon` — Output as TOON (default)
+- `--json` — Output as JSON
+- `--csv` — Output as CSV (flat rows only)
+- `--deliver` — Route output: stdout (default), file:<path>, webhook:<url>
+- `--profile` — Named profile to load
+
+Examples:
+
+```
+invoca transactions get AC0E23E7-59B55738 --as advertiser --id 217350 --json
+```
+
+### `invoca transactions download`
+
+Stream a call recording to disk (refreshes the signed S3 URL just-in-time)
+
+Positional:
+- `transaction_id` — Invoca transaction ID
+
+Flags:
+- `--as` [advertiser|network|affiliate] (required) — Role: advertiser, network, or affiliate
+- `--id` (required) — Advertiser, network, or affiliate ID
+- `--to` (required) — Destination file path (.mp3)
+- `--force` — Overwrite if --to already exists
+- `--dry-run` — Print what would be downloaded without writing
+- `--profile` — Named profile to load
+
+Examples:
+
+```
+invoca transactions download AC0E23E7-59B55738 --as advertiser --id 217350 --to ./call.mp3
+invoca transactions download AC0E23E7-59B55738 --as advertiser --id 217350 --to ./call.mp3 --force
 ```
 
 ## Introspection

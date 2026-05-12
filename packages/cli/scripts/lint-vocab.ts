@@ -24,6 +24,7 @@ const CANONICAL_VERBS = new Set([
   "apply",
   "update",
   "create",
+  "download",
 ]);
 
 const BANNED_FLAGS = new Set([
