@@ -30,6 +30,7 @@ export function registerTransactionsSpecs(): void {
         { name: "--type", brief: "Filter by type: Call, PostCallEvent, Sale, Signal", takesValue: true, values: ["Call", "PostCallEvent", "Sale", "Signal"] },
         { name: "--transaction-id", brief: "Filter to a specific transaction ID", takesValue: true },
         { name: "--call-record-id", brief: "Filter to transactions for a specific call", takesValue: true },
+        { name: "--require-recording", brief: "Drop transactions without a recording (client-side filter; cursor still tracks API page)" },
         { name: "--toon", brief: "Output as TOON (default)" },
         { name: "--json", brief: "Output as JSON" },
         { name: "--csv", brief: "Output as CSV (flat rows only)" },

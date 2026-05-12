@@ -26,6 +26,7 @@ interface Flags {
   readonly type?: string;
   readonly "transaction-id"?: string;
   readonly "call-record-id"?: string;
+  readonly "require-recording": boolean;
   readonly toon: boolean;
   readonly json: boolean;
   readonly csv: boolean;
@@ -91,6 +92,12 @@ export const transactionsListCommand = buildCommand({
         brief: "Filter to transactions for a specific call record ID",
         optional: true,
       },
+      "require-recording": {
+        kind: "boolean",
+        brief:
+          "Drop transactions whose `recording` field is null/empty (client-side filter; pagination cursor still tracks the API response)",
+        default: false,
+      } as const,
       ...paginationFlags,
       ...formatFlags,
       ...deliverFlag,
@@ -137,14 +144,21 @@ export const transactionsListCommand = buildCommand({
         page = await client.transactions.affiliate(flags.id, cleaned);
       }
 
-      const transactions = Array.isArray(page) ? page : page.transactions;
+      const apiTransactions = Array.isArray(page) ? page : page.transactions;
       const apiCursor = Array.isArray(page) ? undefined : page.next_cursor;
       const lastId =
-        transactions.length > 0
-          ? transactions[transactions.length - 1]?.transaction_id
+        apiTransactions.length > 0
+          ? apiTransactions[apiTransactions.length - 1]?.transaction_id
           : undefined;
-      const truncated = transactions.length >= limit;
+      const truncated = apiTransactions.length >= limit;
       const nextCursor = apiCursor ?? (truncated && lastId ? lastId : undefined);
+
+      const transactions = flags["require-recording"]
+        ? apiTransactions.filter((t) => {
+            const r = (t as { recording?: unknown }).recording;
+            return typeof r === "string" && r.length > 0;
+          })
+        : apiTransactions;
 
       await emit(
         {
@@ -152,6 +166,9 @@ export const transactionsListCommand = buildCommand({
           total: transactions.length,
           truncated,
           next_cursor: nextCursor,
+          ...(flags["require-recording"] && transactions.length !== apiTransactions.length
+            ? { filtered_out: apiTransactions.length - transactions.length }
+            : {}),
         },
         flags,
       );
