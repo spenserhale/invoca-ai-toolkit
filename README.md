@@ -12,7 +12,25 @@ A monorepo containing the SDK, CLI, and MCP server for the Invoca API.
 | [`@invoca-toolkit/cli`](./packages/cli) | Command-line interface (Stricli) |
 | [`@invoca-toolkit/mcp`](./packages/mcp) | MCP server for AI assistants (FastMCP) |
 
-## Getting Started
+## Install the CLI
+
+### Recommended: standalone binary
+
+No Node.js, no npm, no PATH conflicts. One file.
+
+**macOS and Linux:**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/spenserhale/invoca-ai-toolkit/main/scripts/install.sh | sh
+```
+
+The script detects your OS + architecture, downloads the matching binary from the latest release, verifies its SHA256, and installs to `$HOME/.local/bin/invoca`.
+
+**Windows:** download `invoca-windows-x64.exe` from the [latest release](https://github.com/spenserhale/invoca-ai-toolkit/releases/latest) and put it on your `PATH`.
+
+After install, run `invoca --help` or `invoca agent-context --json` to see every command.
+
+## Getting Started (from source)
 
 ```bash
 # Install dependencies
