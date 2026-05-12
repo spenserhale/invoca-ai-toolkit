@@ -3,6 +3,7 @@
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
+    "postinstall": "sh ./scripts/link-env.sh",
     "build": "bun run --filter '*' build",
     "dev:mcp": "bun run --filter '@invoca-toolkit/mcp' dev",
     "dev:cli": "bun run --filter '@invoca-toolkit/cli' dev",
