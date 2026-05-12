@@ -3,3 +3,9 @@ name = "invoca-docs-crawler"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = ["crawl4ai>=0.5.0"]
+
+[tool.uv]
+# Force lxml >= 6.1.0 to clear CVE-2026-41066 (XXE via default iterparse).
+# crawl4ai 0.8.6 pins lxml~=5.3 but the lxml.html APIs the crawler uses are
+# stable across 5.x and 6.x.
+override-dependencies = ["lxml>=6.1.0"]
