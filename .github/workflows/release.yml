@@ -1,0 +1,84 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun test
+
+  build:
+    name: build (${{ matrix.target }})
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: bun-darwin-arm64
+            asset: invoca-darwin-arm64
+          - target: bun-darwin-x64
+            asset: invoca-darwin-x64
+          - target: bun-linux-x64
+            asset: invoca-linux-x64
+          - target: bun-windows-x64
+            asset: invoca-windows-x64.exe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Compile
+        run: |
+          mkdir -p dist
+          bun build ./packages/cli/src/bin.ts --compile --target=${{ matrix.target }} --outfile dist/${{ matrix.asset }}
+      - name: Smoke test (linux-x64 only)
+        if: matrix.target == 'bun-linux-x64'
+        run: ./dist/${{ matrix.asset }} agent-context --json | head -5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+          if-no-files-found: error
+
+  release:
+    name: release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Flatten artifacts and checksum
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec mv {} release/ \;
+          cd release
+          for f in invoca-*; do
+            case "$f" in
+              *.sha256|SHA256SUMS) continue ;;
+            esac
+            shasum -a 256 "$f" > "$f.sha256"
+          done
+          shasum -a 256 invoca-* | grep -v '\.sha256$' > SHA256SUMS
+          ls -la
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

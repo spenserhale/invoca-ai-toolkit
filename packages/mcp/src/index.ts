@@ -1,15 +1,17 @@
 import { FastMCP } from "fastmcp";
-import { registerResourceTools } from "./tools/resources.js";
+import { registerRingPoolTools } from "./tools/ringPool.js";
+import { registerBulkRingPoolTools } from "./tools/bulkRingPool.js";
+import { registerSignalTools } from "./tools/signal.js";
+import { registerTransactionsTools } from "./tools/transactions.js";
 
-const server = new FastMCP({
+export const server = new FastMCP({
   name: "invoca-toolkit",
   version: "0.1.0",
 });
 
-// Register tool groups
-registerResourceTools(server);
+registerRingPoolTools(server);
+registerBulkRingPoolTools(server);
+registerSignalTools(server);
+registerTransactionsTools(server);
 
-// Start the server in stdio mode (for Claude Desktop, Cursor, etc.)
-server.start({
-  transportType: "stdio",
-});
+server.start({ transportType: "stdio" });

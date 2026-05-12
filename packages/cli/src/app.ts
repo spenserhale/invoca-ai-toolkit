@@ -1,33 +1,58 @@
 import { buildApplication, buildRouteMap } from "@stricli/core";
-import { listCommand } from "./commands/list.js";
-import { getCommand } from "./commands/get.js";
-import { createCommand } from "./commands/create.js";
-import { deleteCommand } from "./commands/delete.js";
+import { agentContextCommand } from "./commands/agentContext.js";
+import { feedbackCommand } from "./commands/feedback.js";
+import { profileSaveCommand } from "./commands/profile/save.js";
+import { profileListCommand } from "./commands/profile/list.js";
+import { profileShowCommand } from "./commands/profile/show.js";
+import { profileDeleteCommand } from "./commands/profile/delete.js";
+import { jobsListCommand } from "./commands/jobs/list.js";
+import { jobsGetCommand } from "./commands/jobs/get.js";
+import { jobsPruneCommand } from "./commands/jobs/prune.js";
+import { ringpoolRoutes, registerRingPoolSpecs } from "./commands/ringpool/index.js";
+import { bulkRingpoolRoutes, registerBulkRingPoolSpecs } from "./commands/bulk-ringpool/index.js";
+import { signalRoutes, registerSignalSpecs } from "./commands/signal/index.js";
+import { transactionsRoutes, registerTransactionsSpecs } from "./commands/transactions/index.js";
+import { CLI_VERSION } from "./version.js";
 
-const resourceRoutes = buildRouteMap({
+registerRingPoolSpecs();
+registerBulkRingPoolSpecs();
+registerSignalSpecs();
+registerTransactionsSpecs();
+
+const profileRoutes = buildRouteMap({
   routes: {
-    list: listCommand,
-    get: getCommand,
-    create: createCommand,
-    delete: deleteCommand,
+    save: profileSaveCommand,
+    list: profileListCommand,
+    show: profileShowCommand,
+    delete: profileDeleteCommand,
   },
-  docs: {
-    brief: "Manage Invoca resources",
+  docs: { brief: "Manage named profiles" },
+});
+
+const jobsRoutes = buildRouteMap({
+  routes: {
+    list: jobsListCommand,
+    get: jobsGetCommand,
+    prune: jobsPruneCommand,
   },
+  docs: { brief: "Inspect the local jobs ledger" },
 });
 
 const routes = buildRouteMap({
   routes: {
-    resources: resourceRoutes,
+    "agent-context": agentContextCommand,
+    feedback: feedbackCommand,
+    profile: profileRoutes,
+    jobs: jobsRoutes,
+    ringpool: ringpoolRoutes,
+    "bulk-ringpool": bulkRingpoolRoutes,
+    signal: signalRoutes,
+    transactions: transactionsRoutes,
   },
-  docs: {
-    brief: "Invoca Platform Tools",
-  },
+  docs: { brief: "Invoca Platform Tools" },
 });
 
 export const app = buildApplication(routes, {
   name: "invoca",
-  versionInfo: {
-    currentVersion: "0.1.0",
-  },
+  versionInfo: { currentVersion: CLI_VERSION },
 });

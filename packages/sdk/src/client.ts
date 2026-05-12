@@ -1,84 +1,23 @@
-import type {
-  InvocaConfig,
-  Resource,
-  ListResourcesParams,
-  CreateResourceParams,
-  PaginatedResponse,
-} from "./types.js";
-import {
-  InvocaConfigSchema,
-  ResourceSchema,
-  PaginatedResponseSchema,
-  ErrorResponseSchema,
-} from "./types.js";
-import { InvocaError, InvocaAuthError } from "./errors.js";
+import { InvocaConfigSchema, type InvocaConfig } from "./config.js";
+import { RingPoolFamily } from "./families/ringPool.js";
+import { BulkRingPoolFamily } from "./families/bulkRingPool.js";
+import { SignalFamily } from "./families/signal.js";
+import { TransactionsFamily } from "./families/transactions.js";
+
+export interface InvocaClientInput extends Partial<InvocaConfig> {}
 
 export class InvocaClient {
-  private readonly config: InvocaConfig;
+  readonly config: InvocaConfig;
+  readonly ringPool: RingPoolFamily;
+  readonly bulkRingPool: BulkRingPoolFamily;
+  readonly signal: SignalFamily;
+  readonly transactions: TransactionsFamily;
 
-  constructor(config: Partial<InvocaConfig> & { apiKey: string }) {
+  constructor(config: InvocaClientInput = {}) {
     this.config = InvocaConfigSchema.parse(config);
-  }
-
-  // -------------------------------------------------------------------------
-  // HTTP helpers
-  // -------------------------------------------------------------------------
-
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
-    const url = `${this.config.baseUrl}${path}`;
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) throw new InvocaAuthError();
-
-      const errorBody = await res.json().catch(() => null);
-      const parsed = ErrorResponseSchema.safeParse(errorBody);
-
-      throw new InvocaError(
-        parsed.success ? parsed.data.error.message : `HTTP ${res.status}`,
-        parsed.success ? parsed.data.error.code : "UNKNOWN",
-        res.status
-      );
-    }
-
-    return res.json() as Promise<T>;
-  }
-
-  // -------------------------------------------------------------------------
-  // Resource operations -- add your own here
-  // -------------------------------------------------------------------------
-
-  async listResources(
-    params: ListResourcesParams = { page: 1, limit: 20 }
-  ): Promise<PaginatedResponse<Resource>> {
-    const query = new URLSearchParams({
-      page: String(params.page),
-      limit: String(params.limit),
-    });
-    return this.request("GET", `/resources?${query}`);
-  }
-
-  async getResource(id: string): Promise<Resource> {
-    return this.request("GET", `/resources/${id}`);
-  }
-
-  async createResource(params: CreateResourceParams): Promise<Resource> {
-    return this.request("POST", "/resources", params);
-  }
-
-  async deleteResource(id: string): Promise<void> {
-    await this.request("DELETE", `/resources/${id}`);
+    this.ringPool = new RingPoolFamily(this.config);
+    this.bulkRingPool = new BulkRingPoolFamily(this.config);
+    this.signal = new SignalFamily(this.config);
+    this.transactions = new TransactionsFamily(this.config);
   }
 }
