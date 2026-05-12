@@ -1,13 +1,13 @@
 import { buildCommand } from "@stricli/core";
 import { runCommand } from "../../lib/errors.js";
 import { emit } from "../../lib/render.js";
-import { buildClient } from "../../lib/sdk.js";
+import { buildClientFromConfig, resolveCliConfig } from "../../lib/sdk.js";
 import { formatFlags, profileFlag, deliverFlag } from "../../lib/flags.js";
-import { assertRole, fetchOne, roleFlags } from "./_shared.js";
+import { fetchOne, resolveRoleAndId, roleFlags } from "./_shared.js";
 
 interface Flags {
-  readonly as: string;
-  readonly id: string;
+  readonly as?: string;
+  readonly id?: string;
   readonly toon: boolean;
   readonly json: boolean;
   readonly csv: boolean;
@@ -37,9 +37,10 @@ export const transactionsGetCommand = buildCommand({
   },
   async func(this: void, flags: Flags, transactionId: string) {
     await runCommand(async () => {
-      const role = assertRole(flags.as);
-      const client = buildClient(flags);
-      const transaction = await fetchOne(client, role, flags.id, transactionId);
+      const config = resolveCliConfig(flags);
+      const { role, id } = resolveRoleAndId(flags, config);
+      const client = buildClientFromConfig(config);
+      const transaction = await fetchOne(client, role, id, transactionId);
       await emit(transaction, flags);
     });
   },

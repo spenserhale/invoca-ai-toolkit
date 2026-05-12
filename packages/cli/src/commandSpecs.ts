@@ -21,7 +21,35 @@ export interface CommandSpec {
   readonly async?: boolean;
 }
 
-export const SCHEMA_VERSION = "1";
+export const SCHEMA_VERSION = "2";
+
+export interface EnvVarSpec {
+  readonly name: string;
+  readonly brief: string;
+  readonly required?: boolean;
+}
+
+export const ENVIRONMENT: readonly EnvVarSpec[] = [
+  { name: "INVOCA_OAUTH_TOKEN", brief: "Raw OAuth token (no Bearer prefix); required for Signal + Transactions calls", required: true },
+  { name: "INVOCA_NETWORK", brief: "Network subdomain — the part before .invoca.net (e.g. 'mynetwork')", required: true },
+  { name: "INVOCA_ROLE", brief: "Default role: advertiser, network, or affiliate. Lets you omit --as." },
+  { name: "INVOCA_ADVERTISER_ID", brief: "Default --id when INVOCA_ROLE=advertiser" },
+  { name: "INVOCA_NETWORK_ID", brief: "Default --id when INVOCA_ROLE=network" },
+  { name: "INVOCA_AFFILIATE_ID", brief: "Default --id when INVOCA_ROLE=affiliate" },
+  { name: "INVOCA_TIMEOUT_MS", brief: "Request timeout in milliseconds (default 30000)" },
+  { name: "INVOCA_BASE_URL_PNAPI", brief: "Override for pnapi.invoca.net (sandbox/testing)" },
+  { name: "INVOCA_BASE_URL_SIGNAL", brief: "Override for invoca.net Signal host (sandbox/testing)" },
+  { name: "INVOCA_BASE_URL_TRANSACTIONS", brief: "Override for <network>.invoca.net Transactions host (sandbox/testing)" },
+  { name: "INVOCA_BASE_URL_RINGPOOL", brief: "Override for <network>.invoca.net RingPool host (sandbox/testing)" },
+  { name: "INVOCA_FEEDBACK_ENDPOINT", brief: "Optional URL — `invoca feedback` POSTs here in addition to local logging" },
+];
+
+export const RESOLUTION_PRECEDENCE = [
+  "explicit CLI flag (--as, --id, --oauth-token, …)",
+  "named profile (--profile name → ~/.config/invoca/profiles.json)",
+  "environment variable (see environment[])",
+  "schema default",
+] as const;
 
 const FORMAT_FLAGS: readonly FlagSpec[] = OUTPUT_FORMATS.map((f) => ({
   name: `--${f}`,
@@ -118,6 +146,16 @@ export const baseSpecs: CommandSpec[] = [
     mutates: true,
   },
   {
+    path: ["config", "show"],
+    brief:
+      "Print resolved config (role, IDs, network, token presence) with source labels; token value is never printed",
+    flags: [...FORMAT_FLAGS, DELIVER_FLAG, PROFILE_FLAG],
+    examples: [
+      "invoca config show",
+      "invoca config show --json | jq '.role.source'",
+    ],
+  },
+  {
     path: ["feedback"],
     brief: "Record feedback locally; POSTs upstream when INVOCA_FEEDBACK_ENDPOINT is set",
     positional: [{ name: "text", brief: "Feedback message" }],
@@ -148,6 +186,8 @@ export interface AgentContext {
   deliver_schemes: readonly string[];
   exit_codes: Record<string, number>;
   error_codes: readonly string[];
+  environment: readonly EnvVarSpec[];
+  resolution_precedence: readonly string[];
   flags: {
     format: readonly FlagSpec[];
     deliver: FlagSpec;
@@ -185,6 +225,8 @@ export function buildAgentContext(version: string): AgentContext {
     deliver_schemes: ["stdout", "file:<path>", "webhook:<url>"],
     exit_codes,
     error_codes: Object.keys(ErrorCode),
+    environment: ENVIRONMENT,
+    resolution_precedence: RESOLUTION_PRECEDENCE,
     flags: FOUNDATION_FLAGS,
     commands: allSpecs(),
   };

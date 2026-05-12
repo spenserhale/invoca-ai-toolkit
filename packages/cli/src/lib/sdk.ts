@@ -5,8 +5,15 @@ export interface SdkFactoryFlags {
   readonly profile?: string;
 }
 
-export function buildClient(flags: SdkFactoryFlags = {}): InvocaClient {
+export function resolveCliConfig(flags: SdkFactoryFlags = {}): InvocaConfig {
   const profile = flags.profile ? loadProfile(flags.profile) : undefined;
-  const config: InvocaConfig = resolveConfig(profile);
+  return resolveConfig(profile);
+}
+
+export function buildClient(flags: SdkFactoryFlags = {}): InvocaClient {
+  return new InvocaClient(resolveCliConfig(flags));
+}
+
+export function buildClientFromConfig(config: InvocaConfig): InvocaClient {
   return new InvocaClient(config);
 }

@@ -1,21 +1,23 @@
-import { InvocaError } from "@invoca-toolkit/sdk";
-import type { InvocaClient } from "@invoca-toolkit/sdk";
+import { InvocaError, envVarForRoleId, roleIdFor } from "@invoca-toolkit/sdk";
+import type { InvocaClient, InvocaConfig, Role } from "@invoca-toolkit/sdk";
 
 export const VALID_ROLES = ["advertiser", "network", "affiliate"] as const;
-export type Role = (typeof VALID_ROLES)[number];
+export type { Role };
 
 export const roleFlags = {
   as: {
     kind: "parsed",
     parse: String,
-    brief: "Role perspective: advertiser, network, or affiliate",
-    optional: false,
+    brief:
+      "Role perspective: advertiser, network, or affiliate (defaults to $INVOCA_ROLE)",
+    optional: true,
   },
   id: {
     kind: "parsed",
     parse: String,
-    brief: "Advertiser, network, or affiliate ID",
-    optional: false,
+    brief:
+      "Role ID (defaults to $INVOCA_ADVERTISER_ID / _NETWORK_ID / _AFFILIATE_ID for the resolved role)",
+    optional: true,
   },
 } as const;
 
@@ -29,6 +31,57 @@ export function assertRole(value: string): Role {
     });
   }
   return value as Role;
+}
+
+export interface ResolvedRoleAndId {
+  readonly role: Role;
+  readonly id: string;
+  readonly roleSource: "flag" | "env";
+  readonly idSource: "flag" | "env";
+}
+
+export function resolveRoleAndId(
+  flags: { readonly as?: string; readonly id?: string },
+  config: InvocaConfig,
+): ResolvedRoleAndId {
+  let role: Role;
+  let roleSource: "flag" | "env";
+  if (flags.as) {
+    role = assertRole(flags.as);
+    roleSource = "flag";
+  } else if (config.role) {
+    role = config.role;
+    roleSource = "env";
+  } else {
+    throw new InvocaError({
+      code: "E_CONFIG",
+      message: "role is not configured",
+      validValues: [...VALID_ROLES],
+      hint:
+        "pass --as advertiser|network|affiliate, or export INVOCA_ROLE=advertiser " +
+        "in your shell rc (and INVOCA_ADVERTISER_ID=<your-id> while you're at it)",
+    });
+  }
+
+  let id: string;
+  let idSource: "flag" | "env";
+  if (flags.id) {
+    id = flags.id;
+    idSource = "flag";
+  } else {
+    const fromEnv = roleIdFor(role, config);
+    if (!fromEnv) {
+      throw new InvocaError({
+        code: "E_CONFIG",
+        message: `role ID not configured for role "${role}"`,
+        hint: `pass --id <id>, or export ${envVarForRoleId(role)}=<your-id> in your shell rc`,
+      });
+    }
+    id = fromEnv;
+    idSource = "env";
+  }
+
+  return { role, id, roleSource, idSource };
 }
 
 export async function fetchOne(

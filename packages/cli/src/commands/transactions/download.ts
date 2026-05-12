@@ -5,13 +5,13 @@ import { pipeline } from "node:stream/promises";
 import { buildCommand } from "@stricli/core";
 import { InvocaError } from "@invoca-toolkit/sdk";
 import { runCommand } from "../../lib/errors.js";
-import { buildClient } from "../../lib/sdk.js";
+import { buildClientFromConfig, resolveCliConfig } from "../../lib/sdk.js";
 import { profileFlag, safetyFlags } from "../../lib/flags.js";
-import { assertRole, fetchOne, roleFlags } from "./_shared.js";
+import { fetchOne, resolveRoleAndId, roleFlags } from "./_shared.js";
 
 interface Flags {
-  readonly as: string;
-  readonly id: string;
+  readonly as?: string;
+  readonly id?: string;
   readonly to: string;
   readonly force: boolean;
   readonly "dry-run": boolean;
@@ -47,7 +47,8 @@ export const transactionsDownloadCommand = buildCommand({
   },
   async func(this: void, flags: Flags, transactionId: string) {
     await runCommand(async () => {
-      const role = assertRole(flags.as);
+      const config = resolveCliConfig(flags);
+      const { role, id } = resolveRoleAndId(flags, config);
       const outPath = resolve(flags.to);
 
       if (existsSync(outPath) && !flags.force && !flags["dry-run"]) {
@@ -58,8 +59,8 @@ export const transactionsDownloadCommand = buildCommand({
         });
       }
 
-      const client = buildClient(flags);
-      const transaction = await fetchOne(client, role, flags.id, transactionId);
+      const client = buildClientFromConfig(config);
+      const transaction = await fetchOne(client, role, id, transactionId);
       const url = transaction.recording_download_url as string | undefined;
       if (!url) {
         throw new InvocaError({

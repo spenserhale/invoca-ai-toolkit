@@ -3,11 +3,15 @@ export {
   resolveConfig,
   hostFor,
   requireOauthToken,
+  roleIdFor,
+  envVarForRoleId,
   InvocaConfigSchema,
   BaseUrlOverridesSchema,
+  RoleSchema,
   type InvocaConfig,
   type BaseUrlOverrides,
   type ResolveConfigInput,
+  type Role,
 } from "./config.js";
 export {
   InvocaError,

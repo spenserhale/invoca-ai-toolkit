@@ -30,6 +30,28 @@ The script detects your OS + architecture, downloads the matching binary from th
 
 After install, run `invoca --help` or `invoca agent-context --json` to see every command.
 
+## Configure the CLI
+
+Set credentials + role defaults once in your shell startup file (`~/.zshrc`
+for zsh, `~/.bashrc` for bash) so every new terminal session is ready:
+
+```sh
+cat >> ~/.zshrc <<'EOF'
+# Invoca CLI
+export INVOCA_OAUTH_TOKEN="<your-raw-token>"      # no Bearer prefix
+export INVOCA_NETWORK="<your-subdomain>"          # e.g. "mynetwork"
+export INVOCA_ROLE="advertiser"                   # advertiser | network | affiliate
+export INVOCA_ADVERTISER_ID="<your-advertiser-id>"
+EOF
+
+source ~/.zshrc
+```
+
+`INVOCA_ROLE` + the matching `INVOCA_<ROLE>_ID` let you omit `--as` / `--id`
+on every command. Override on a single call with `--as <role> --id <id>` when
+you need to peek at a different role. Run `invoca config show` to see
+exactly what got resolved. Full reference: [`packages/cli/README.md`](./packages/cli/README.md).
+
 ## Getting Started (from source)
 
 ```bash

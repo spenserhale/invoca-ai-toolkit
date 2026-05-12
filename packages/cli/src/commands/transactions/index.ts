@@ -19,8 +19,8 @@ export function registerTransactionsSpecs(): void {
       path: ["transactions", "list"],
       brief: "List transactions for an advertiser, network, or affiliate",
       flags: [
-        { name: "--as", brief: "Role: advertiser, network, or affiliate", takesValue: true, required: true, values: ["advertiser", "network", "affiliate"] },
-        { name: "--id", brief: "Advertiser, network, or affiliate ID", takesValue: true, required: true },
+        { name: "--as", brief: "Role: advertiser, network, or affiliate (defaults to $INVOCA_ROLE)", takesValue: true, values: ["advertiser", "network", "affiliate"] },
+        { name: "--id", brief: "Role ID (defaults to $INVOCA_<ROLE>_ID for the resolved role)", takesValue: true },
         { name: "--from", brief: "Start date (YYYY-MM-DD, inclusive)", takesValue: true },
         { name: "--to", brief: "End date (YYYY-MM-DD, inclusive)", takesValue: true },
         { name: "--limit", brief: "Maximum number of transactions (default: 20)", takesValue: true, default: "20" },
@@ -48,8 +48,8 @@ export function registerTransactionsSpecs(): void {
       brief: "Fetch a single transaction by its transaction_id",
       positional: [{ name: "transaction_id", brief: "Invoca transaction ID" }],
       flags: [
-        { name: "--as", brief: "Role: advertiser, network, or affiliate", takesValue: true, required: true, values: ["advertiser", "network", "affiliate"] },
-        { name: "--id", brief: "Advertiser, network, or affiliate ID", takesValue: true, required: true },
+        { name: "--as", brief: "Role: advertiser, network, or affiliate (defaults to $INVOCA_ROLE)", takesValue: true, values: ["advertiser", "network", "affiliate"] },
+        { name: "--id", brief: "Role ID (defaults to $INVOCA_<ROLE>_ID for the resolved role)", takesValue: true },
         { name: "--toon", brief: "Output as TOON (default)" },
         { name: "--json", brief: "Output as JSON" },
         { name: "--csv", brief: "Output as CSV (flat rows only)" },
@@ -65,8 +65,8 @@ export function registerTransactionsSpecs(): void {
       brief: "Stream a call recording to disk (refreshes the signed S3 URL just-in-time)",
       positional: [{ name: "transaction_id", brief: "Invoca transaction ID" }],
       flags: [
-        { name: "--as", brief: "Role: advertiser, network, or affiliate", takesValue: true, required: true, values: ["advertiser", "network", "affiliate"] },
-        { name: "--id", brief: "Advertiser, network, or affiliate ID", takesValue: true, required: true },
+        { name: "--as", brief: "Role: advertiser, network, or affiliate (defaults to $INVOCA_ROLE)", takesValue: true, values: ["advertiser", "network", "affiliate"] },
+        { name: "--id", brief: "Role ID (defaults to $INVOCA_<ROLE>_ID for the resolved role)", takesValue: true },
         { name: "--to", brief: "Destination file path (.mp3)", takesValue: true, required: true },
         { name: "--force", brief: "Overwrite if --to already exists" },
         { name: "--dry-run", brief: "Print what would be downloaded without writing" },

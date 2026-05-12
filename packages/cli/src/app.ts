@@ -1,5 +1,6 @@
 import { buildApplication, buildRouteMap } from "@stricli/core";
 import { agentContextCommand } from "./commands/agentContext.js";
+import { configShowCommand } from "./commands/config/show.js";
 import { feedbackCommand } from "./commands/feedback.js";
 import { profileSaveCommand } from "./commands/profile/save.js";
 import { profileListCommand } from "./commands/profile/list.js";
@@ -38,10 +39,18 @@ const jobsRoutes = buildRouteMap({
   docs: { brief: "Inspect the local jobs ledger" },
 });
 
+const configRoutes = buildRouteMap({
+  routes: {
+    show: configShowCommand,
+  },
+  docs: { brief: "Inspect the resolved CLI configuration" },
+});
+
 const routes = buildRouteMap({
   routes: {
     "agent-context": agentContextCommand,
     feedback: feedbackCommand,
+    config: configRoutes,
     profile: profileRoutes,
     jobs: jobsRoutes,
     ringpool: ringpoolRoutes,

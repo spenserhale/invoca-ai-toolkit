@@ -10,6 +10,9 @@ export const BaseUrlOverridesSchema = z
   })
   .default({});
 
+export const RoleSchema = z.enum(["advertiser", "network", "affiliate"]);
+export type Role = z.infer<typeof RoleSchema>;
+
 export const InvocaConfigSchema = z.object({
   oauthToken: z.string().min(1).optional(),
   network: z
@@ -20,6 +23,10 @@ export const InvocaConfigSchema = z.object({
   baseUrlOverrides: BaseUrlOverridesSchema,
   timeoutMs: z.number().int().positive().default(30_000),
   userAgent: z.string().min(1).default("invoca-toolkit"),
+  role: RoleSchema.optional(),
+  advertiserId: z.string().min(1).optional(),
+  networkId: z.string().min(1).optional(),
+  affiliateId: z.string().min(1).optional(),
 });
 
 export type InvocaConfig = z.infer<typeof InvocaConfigSchema>;
@@ -31,6 +38,10 @@ export interface ResolveConfigInput {
   baseUrlOverrides?: BaseUrlOverrides;
   timeoutMs?: number;
   userAgent?: string;
+  role?: Role;
+  advertiserId?: string;
+  networkId?: string;
+  affiliateId?: string;
   env?: Record<string, string | undefined>;
 }
 
@@ -55,6 +66,10 @@ export function resolveConfig(overrides: ResolveConfigInput = {}): InvocaConfig 
       overrides.timeoutMs ??
       (env.INVOCA_TIMEOUT_MS ? Number(env.INVOCA_TIMEOUT_MS) : undefined),
     userAgent: overrides.userAgent ?? env.INVOCA_USER_AGENT,
+    role: overrides.role ?? env.INVOCA_ROLE,
+    advertiserId: overrides.advertiserId ?? env.INVOCA_ADVERTISER_ID,
+    networkId: overrides.networkId ?? env.INVOCA_NETWORK_ID,
+    affiliateId: overrides.affiliateId ?? env.INVOCA_AFFILIATE_ID,
   };
 
   const cleaned = Object.fromEntries(
@@ -88,6 +103,28 @@ export function hostFor(
       return "https://invoca.net";
     case "transactions":
       return `https://${config.network}.invoca.net`;
+  }
+}
+
+export function roleIdFor(role: Role, config: InvocaConfig): string | undefined {
+  switch (role) {
+    case "advertiser":
+      return config.advertiserId;
+    case "network":
+      return config.networkId;
+    case "affiliate":
+      return config.affiliateId;
+  }
+}
+
+export function envVarForRoleId(role: Role): string {
+  switch (role) {
+    case "advertiser":
+      return "INVOCA_ADVERTISER_ID";
+    case "network":
+      return "INVOCA_NETWORK_ID";
+    case "affiliate":
+      return "INVOCA_AFFILIATE_ID";
   }
 }
 
