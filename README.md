@@ -25,6 +25,8 @@ curl -fsSL https://raw.githubusercontent.com/spenserhale/invoca-ai-toolkit/main/
 ```
 
 The script detects your OS + architecture, downloads the matching binary from the latest release, verifies its SHA256, and installs to `$HOME/.local/bin/invoca`.
+Set `INVOCA_TOOLKIT_VERSION=v0.1.1` to pin a release or
+`INVOCA_TOOLKIT_INSTALL=$HOME/bin` to choose the install directory.
 
 **Windows:** download `invoca-windows-x64.exe` from the [latest release](https://github.com/spenserhale/invoca-ai-toolkit/releases/latest) and put it on your `PATH`.
 

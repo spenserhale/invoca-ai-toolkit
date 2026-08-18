@@ -8,7 +8,8 @@
 set -eu
 
 REPO="spenserhale/invoca-ai-toolkit"
-INSTALL_DIR="$HOME/.local/bin"
+VERSION="${INVOCA_TOOLKIT_VERSION:-latest}"
+INSTALL_DIR="${INVOCA_TOOLKIT_INSTALL:-$HOME/.local/bin}"
 
 detect_platform() {
   os=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -28,7 +29,11 @@ detect_platform() {
 
 platform=$(detect_platform)
 asset="invoca-${platform}"
-url="https://github.com/${REPO}/releases/latest/download/${asset}"
+if [ "$VERSION" = "latest" ]; then
+  url="https://github.com/${REPO}/releases/latest/download/${asset}"
+else
+  url="https://github.com/${REPO}/releases/download/${VERSION}/${asset}"
+fi
 checksum_url="${url}.sha256"
 
 tmp=$(mktemp -d)

@@ -13,6 +13,8 @@ curl -fsSL https://raw.githubusercontent.com/spenserhale/invoca-ai-toolkit/main/
 ```
 
 Installs to `$HOME/.local/bin/invoca`. Verified by SHA256.
+Set `INVOCA_TOOLKIT_VERSION` to pin a release or `INVOCA_TOOLKIT_INSTALL` to
+change the install directory.
 
 ## Configure
 
